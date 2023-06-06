@@ -5,8 +5,7 @@ namespace MedicaBE.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController : ControllerBase
+    public class RetailerController : ControllerBase
     {
-
     }
 }
