@@ -8,36 +8,36 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MedicaBE.Controllers;
 
-    [Route("api/[controller]")]
-    [ApiController]
-    public class UserController : ControllerBase
+[Route("api/[controller]")]
+[ApiController]
+public class UserController : ControllerBase
+{
+    private readonly IUserRepository _userRepository;
+    private readonly IConfiguration _configuration;
+    private readonly JwtTokenHelper _jwtTokenHelper;
+    private readonly IUniqueAttributesRepository _attributesRepository;
+
+    public UserController(IUserRepository _iuserRepository, IConfiguration configuration, JwtTokenHelper jwtTokenHelper, IUniqueAttributesRepository uniqueAttributesRepository)
     {
-        private readonly IUserRepository userRepository;
-        private readonly IConfiguration _configuration;
-        private readonly JwtTokenHelper _jwtTokenHelper;
+        _userRepository = _iuserRepository;
+        _configuration = configuration;
+        _jwtTokenHelper = jwtTokenHelper;
+        _attributesRepository = uniqueAttributesRepository;
+    }
 
-    public UserController(IUserRepository _iuserRepository, IConfiguration configuration, JwtTokenHelper jwtTokenHelper)
+    [HttpPost("User login")]
+    public IActionResult UserLogin(UserLoginViewModel user)
+    {
+        if (!ModelState.IsValid)
         {
-            userRepository = _iuserRepository;
-           _configuration = configuration;
-          _jwtTokenHelper = jwtTokenHelper;
-        }
-
-        [HttpPost("User login")]
-        public IActionResult UserLogin(UserLoginViewModel user)
-        {
-            if (!ModelState.IsValid)
-            {
-
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
             return BadRequest(errors);
+        }
+        else
+        {
 
-            }
-            else
-            {
-
-             var check = userRepository.ValidateUser(user);
-            if(check == null)
+            var check = _userRepository.ValidateUser(user);
+            if (check == null)
             {
                 return BadRequest("User not found .... !!!");
             }
@@ -48,24 +48,39 @@ namespace MedicaBE.Controllers;
 
         }
 
-        }
+    }
 
-    [Authorize(AuthenticationSchemes = "Token2")]
+    // [Authorize(AuthenticationSchemes = "UserToken")]
     [HttpPost("Register user")]
-        public IActionResult RegisterUser(UserRegisterViewModel user)
+    public IActionResult RegisterUser(UserRegisterViewModel user)
+    {
+        var email = _attributesRepository.IsUserEmailUnique(user.Email);
+        var phone = _attributesRepository.IsUserPhoneUnique(user.PhoneNumber);
+        if (!ModelState.IsValid)
         {
-            if (ModelState.IsValid)
-            {
-                var result = userRepository.RegisterUser(user);
-                return Ok(result);
-            }
-            else
-            {
-                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                return BadRequest(errors);
-            }
-
+            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+            return BadRequest(errors);
         }
+        if (email != null && phone != null)
+        {
+            return BadRequest("Email and Phone are already registered.");
+        }
+        if (email != null)
+        {
+            return BadRequest("Email is already registered.");
+        }
+        if (phone != null)
+        {
+            return BadRequest("Phone is already registered.");
+        }
+        if (ModelState.IsValid)
+        {
+            var result = _userRepository.RegisterUser(user);
+            return Ok(result + "Registration successful");
+        }
+        return BadRequest("Not registered !!!");
 
     }
+
+}
 

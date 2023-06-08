@@ -11,11 +11,11 @@ namespace MedicaBE.Entities.ViewModels
     public class LoginVM
     {
         [BsonElement("phonenumber")]
-        [Required]
+        [Required(ErrorMessage = "Phone number is Required")]
         public long PhoneNumber { get; set; }
 
         [BsonElement("password")]
-        [Required]
+        [Required(ErrorMessage = "Password is Required")]
         public string Password { get; set; }
     }
 }

@@ -26,15 +26,6 @@ namespace MedicaBE.Repository.Repository
             _configuration = configuration;
         }
 
-
-        //private readonly IMongoCollection<Retailer> collection;
-
-        //public RetailerRepository(IMongoDatabase database )
-        //{
-        //    collection = database.GetCollection<Retailer>("Retailer");
-
-        //}
-
         public Retailer Registration(RegistrationVM model)
         {
             var filter = Builders<Retailer>.Filter.Eq(x => x.PhoneNumber, model.PhoneNumber);

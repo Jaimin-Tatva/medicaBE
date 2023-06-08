@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MedicaBE.Controllers
 {
- 
+
     [Route("api/[controller]")]
     [ApiController]
     public class RetailerController : ControllerBase
@@ -25,14 +25,14 @@ namespace MedicaBE.Controllers
             _jwtTokenHelper = jwtTokenHelper;
         }
 
-        
+
         [HttpPost("Registration")]
         public IActionResult Register(RegistrationVM model)
         {
             if (ModelState.IsValid)
             {
                 var user = _RetailRepo.Registration(model);
-                if(user == null)
+                if (user == null)
                 {
                     return BadRequest("Mobile Number Already Exist!!");
                 }
@@ -47,10 +47,10 @@ namespace MedicaBE.Controllers
             var user = new LoginVM();
             user.PhoneNumber = PhoneNumber;
             user.Password = Password;
-            if (ModelState.IsValid) 
+            if (ModelState.IsValid)
             {
                 var checkuser = _RetailRepo.Login(user);
-                if(checkuser != null)
+                if (checkuser != null)
                 {
                     var jwtSettings = _configuration.GetSection(nameof(JwtSetting)).Get<JwtSetting>();
                     var token = _jwtTokenHelper.GenerateToken(jwtSettings, checkuser);
@@ -65,7 +65,7 @@ namespace MedicaBE.Controllers
             return Ok();
         }
 
-        [Authorize(AuthenticationSchemes = "Token1")]
+        [Authorize(AuthenticationSchemes = "RetailerToken")]
         [HttpGet]
         public IActionResult RetailerList()
         {

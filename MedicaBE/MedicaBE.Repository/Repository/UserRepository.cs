@@ -21,10 +21,11 @@ namespace MedicaBE.Repository.Repository
         public UserRepository(DatabaseSettings settings, IMongoClient mongoClient, IEncryptDecryptPassword encryptDecryptPassword, IConfiguration configuration)
         {
             var database = mongoClient.GetDatabase(settings.DatabaseName);
-            _user = database.GetCollection<User>(settings.CollectionNames["UserCollection"]);
+            _user = database.GetCollection<User>(settings.CollectionNames["User"]);
             _encryptDecryptPassword = encryptDecryptPassword;
             _configuration = configuration;
         }
+
 
         public User ValidateUser(UserLoginViewModel user)
         {
@@ -56,5 +57,5 @@ namespace MedicaBE.Repository.Repository
 
         }
 
-    }
+    } 
 }
