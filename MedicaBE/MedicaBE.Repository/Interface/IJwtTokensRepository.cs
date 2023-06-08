@@ -6,11 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MedicaBE.Repository.Interface;
-
-public interface IUserRepository
+namespace MedicaBE.Repository.Interface
 {
-     string ValidateUser(UserLoginViewModel user);
-     int RegisterUser(UserRegisterViewModel user);
+    public interface IJwtTokensRepository
+    {
+        public string CreateTokenForUser(User user);
+    }
 }
-

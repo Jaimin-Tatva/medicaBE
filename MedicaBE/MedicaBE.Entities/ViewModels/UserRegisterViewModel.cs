@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Xunit;
+
 
 namespace MedicaBE.Entities.ViewModels
 {
@@ -21,6 +21,7 @@ namespace MedicaBE.Entities.ViewModels
 
         [BsonElement("phonenumber")]
         [Required(ErrorMessage = "Phone number is Required")]
+        [RegularExpression(@"^[0-9]{10}$", ErrorMessage = "Invalid phone number format.")]
         public long PhoneNumber { get; set; }
 
         [BsonElement("password")]
@@ -36,7 +37,7 @@ namespace MedicaBE.Entities.ViewModels
 
         [BsonElement("email")]
         [Required(ErrorMessage = "Email is Required")]
-        [RegularExpression("^[a-zA-Z0-9_\\.-]+@([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$", ErrorMessage = "Please enter a valid email address !!!")]
+        [EmailAddress(ErrorMessage = "Invalid email format.")]
         public string? Email { get; set; }
 
         [BsonElement("createdat")]
