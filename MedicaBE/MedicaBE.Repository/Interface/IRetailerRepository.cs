@@ -13,5 +13,7 @@ namespace MedicaBE.Entities.Interface
         public Retailer Registration(RegistrationVM model);
 
         public Retailer Login(LoginVM model);
+
+        public List<Retailer> getuserlist();
     }
 }

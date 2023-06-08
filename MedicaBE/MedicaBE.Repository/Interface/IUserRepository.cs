@@ -1,4 +1,5 @@
-﻿using MedicaBE.Entities.ViewModels;
+﻿using MedicaBE.Entities.Models;
+using MedicaBE.Entities.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace MedicaBE.Repository.Interface;
 
 public interface IUserRepository
 {
-    public int ValidateUser(UserLoginViewModel user);
+    User ValidateUser(UserLoginViewModel user);
     public int RegisterUser(UserRegisterViewModel user);
 }
 
