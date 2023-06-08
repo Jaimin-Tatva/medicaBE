@@ -18,7 +18,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEncryptDecryptPassword, EncryptDecryptPassword>();
 builder.Services.AddScoped<JwtTokenHelper>();
-
+builder.Services.AddScoped<IUniqueAttributesRepository, UniqueAttributesRepository>();
+builder.Services.AddScoped<IRetailerRepository, RetailerRepository>();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
 
@@ -27,25 +28,12 @@ builder.Services.Configure<DatabaseSettings>(builder.Configuration.GetSection(na
 builder.Services.AddSingleton<DatabaseSettings>(sp => sp.GetRequiredService<IOptions<DatabaseSettings>>().Value);
 builder.Services.AddSingleton<IMongoClient>(s => new MongoClient(builder.Configuration.GetValue<string>("DatabaseSettings:ConnectionString")));
 
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
-//{
-//    options.TokenValidationParameters = new TokenValidationParameters
-//    {
-//        ValidateIssuer = true,
-//        ValidateAudience = true,
-//        ValidateLifetime = true,
-//        ValidateIssuerSigningKey = true,
-//        ValidIssuer = builder.Configuration["JwtSetting:Issuer"],
-//        ValidAudience = builder.Configuration["JwtSetting:Issuer"],
-//        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSetting:Key"]))
-//    };
-//});
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-.AddJwtBearer("Token1", options =>
+.AddJwtBearer("RetailerToken", options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -53,12 +41,12 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["JwtSetting:Token1:Issuer"],
-        ValidAudience = builder.Configuration["JwtSetting:Token1:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSetting:Token1:Key"]))
+        ValidIssuer = builder.Configuration["JwtSetting:RetailerToken:Issuer"],
+        ValidAudience = builder.Configuration["JwtSetting:RetailerToken:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSetting:RetailerToken:Key"]))
     };
 })
-.AddJwtBearer("Token2", options =>
+.AddJwtBearer("UserToken", options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -66,24 +54,11 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["JwtSetting:Token2:Issuer"],
-        ValidAudience = builder.Configuration["JwtSetting:Token2:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSetting:Token2:Key"]))
+        ValidIssuer = builder.Configuration["JwtSetting:UserToken:Issuer"],
+        ValidAudience = builder.Configuration["JwtSetting:UserToken:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSetting:UserToken:Key"]))
     };
 });
-
-
-
-//builder.Services.AddSingleton<IMongoDatabase>(option =>
-//{
-//    var settings = builder.Configuration.GetSection("DatabaseSettings").Get<DatabaseSettings>();
-//    var client = new MongoClient(settings.ConnectionString);
-//    return client.GetDatabase(settings.DatabaseName);
-//});
-
-builder.Services.AddScoped<IRetailerRepository, RetailerRepository>();
-
-// Add services to the container.
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -95,7 +70,7 @@ builder.Services.AddSwaggerGen(swagger =>
     swagger.SwaggerDoc("v1", new OpenApiInfo
     {
         Version = "v1",
-        Title = "JWT Token Authentication API",
+        Title = "Medical BackEnd",
         Description = "ASP.NET Core 6.0 Web API"
     });
     // To Enable authorization using Swagger (JWT)  

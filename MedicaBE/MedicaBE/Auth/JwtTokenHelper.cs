@@ -20,10 +20,10 @@
                 if (jwtSetting == null)
                     return string.Empty;
 
-            var token1Key = _configuration.GetValue<string>("JwtSetting:Token1:Key");
-            jwtSetting.Issuer = _configuration.GetValue<string>("JwtSetting:Token1:Issuer");
-            jwtSetting.Audience = _configuration.GetValue<string>("JwtSetting:Token1:Audience");
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(token1Key));
+            var retailerTokenKey = _configuration.GetValue<string>("JwtSetting:RetailerToken:Key");
+            jwtSetting.Issuer = _configuration.GetValue<string>("JwtSetting:RetailerToken:Issuer");
+            jwtSetting.Audience = _configuration.GetValue<string>("JwtSetting:RetailerToken:Audience");
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(retailerTokenKey));
 
                 var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
@@ -48,10 +48,10 @@
                 if (jwtSetting == null)
                     return string.Empty;
 
-                var token2Key = _configuration.GetValue<string>("JwtSetting:Token2:Key");
-                jwtSetting.Issuer = _configuration.GetValue<string>("JwtSetting:Token2:Issuer");
-                jwtSetting.Audience = _configuration.GetValue<string>("JwtSetting:Token2:Audience");
-                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(token2Key));
+                var userTokenKey = _configuration.GetValue<string>("JwtSetting:UserToken:Key");
+                jwtSetting.Issuer = _configuration.GetValue<string>("JwtSetting:UserToken:Issuer");
+                jwtSetting.Audience = _configuration.GetValue<string>("JwtSetting:UserToken:Audience");
+                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(userTokenKey));
                 var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
                 var claims = new[]

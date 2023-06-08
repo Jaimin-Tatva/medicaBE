@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,5 +18,6 @@ namespace MedicaBE.Entities.ViewModels;
         [BsonElement("password")]
         [Required(ErrorMessage = "Password is Required")]
         public string Password { get; set; }
-    }
+
+}
 
