@@ -10,7 +10,9 @@ namespace MedicaBE.Repository.Interface;
 
 public interface IUserRepository
 {
-     string ValidateUser(UserLoginViewModel user);
-     int RegisterUser(UserRegisterViewModel user);
+
+    User ValidateUser(UserLoginViewModel user);
+    public int RegisterUser(UserRegisterViewModel user);
+
 }
 

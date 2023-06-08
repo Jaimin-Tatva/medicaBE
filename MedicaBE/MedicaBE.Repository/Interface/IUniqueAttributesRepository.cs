@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MedicaBE.Entities.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ namespace MedicaBE.Repository.Interface
 {
     public interface IUniqueAttributesRepository
     {
-        public bool IsUserEmailUnique(string email);
-        public bool IsUserPhoneUnique(long phonenumber);
+        public User IsUserEmailUnique(string email);
+        public User IsUserPhoneUnique(long phonenumber);
     }
 }

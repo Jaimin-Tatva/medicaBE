@@ -1,7 +1,7 @@
-﻿using MedicaBE.Entities.Models;
+﻿using MedicaBE.Auth;
+using MedicaBE.Entities.Auth;
 using MedicaBE.Entities.ViewModels;
 using MedicaBE.Repository.Interface;
-using MedicaBE.Repository.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,12 +13,16 @@ namespace MedicaBE.Controllers;
 public class UserController : ControllerBase
 {
     private readonly IUserRepository _userRepository;
-    private readonly IUniqueAttributesRepository _attributesRepository;
     private readonly IConfiguration _configuration;
-    public UserController(IUserRepository iuserRepository, IUniqueAttributesRepository attributesRepository)
+    private readonly JwtTokenHelper _jwtTokenHelper;
+    private readonly IUniqueAttributesRepository _attributesRepository;
+
+    public UserController(IUserRepository _iuserRepository, IConfiguration configuration, JwtTokenHelper jwtTokenHelper, IUniqueAttributesRepository uniqueAttributesRepository)
     {
-        _userRepository = iuserRepository;
-        _attributesRepository = attributesRepository;
+        _userRepository = _iuserRepository;
+        _configuration = configuration;
+        _jwtTokenHelper = jwtTokenHelper;
+        _attributesRepository = uniqueAttributesRepository;
     }
 
     [HttpPost("User login")]
@@ -31,49 +35,50 @@ public class UserController : ControllerBase
         }
         else
         {
+
             var check = _userRepository.ValidateUser(user);
-            if(check != null)
+            if (check == null)
             {
-                return Ok(check);
+                return BadRequest("User not found .... !!!");
             }
-            else
-            {
-                return BadRequest("User not found !!!");
-            }
-            
+            var jwtSettings = _configuration.GetSection(nameof(JwtSetting)).Get<JwtSetting>();
+            var token = _jwtTokenHelper.GenerateUserToken(jwtSettings, check);
+
+            return Ok(token);
+
         }
 
     }
 
-    [Authorize]
+    // [Authorize(AuthenticationSchemes = "UserToken")]
     [HttpPost("Register user")]
     public IActionResult RegisterUser(UserRegisterViewModel user)
     {
-        bool email = _attributesRepository.IsUserEmailUnique(user.Email);
-        bool phone = _attributesRepository.IsUserPhoneUnique(user.PhoneNumber);
-      //  var repository = new AttributesRepository<User, string>(settings, mongoClient, "User");
-
-
+        var email = _attributesRepository.IsUserEmailUnique(user.Email);
+        var phone = _attributesRepository.IsUserPhoneUnique(user.PhoneNumber);
         if (!ModelState.IsValid)
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
             return BadRequest(errors);
         }
-
-        else if (!email)
+        if (email != null && phone != null)
+        {
+            return BadRequest("Email and Phone are already registered.");
+        }
+        if (email != null)
         {
             return BadRequest("Email is already registered.");
         }
-
-        else if (!phone)
+        if (phone != null)
         {
-            return BadRequest("Phone number is already registered.");
+            return BadRequest("Phone is already registered.");
         }
-        else
+        if (ModelState.IsValid)
         {
             var result = _userRepository.RegisterUser(user);
-            return Ok(result);
+            return Ok(result + "Registration successful");
         }
+        return BadRequest("Not registered !!!");
 
     }
 

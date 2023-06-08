@@ -1,6 +1,7 @@
 ﻿using MedicaBE.Entities.Models;
 using MedicaBE.Entities.ViewModels;
 using MedicaBE.Repository.Interface;
+using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -11,30 +12,27 @@ using System.Threading.Tasks;
 namespace MedicaBE.Repository.Repository
 {
     public class UserRepository : IUserRepository
+
     {
         private readonly IMongoCollection<User> _user;
         private readonly IEncryptDecryptPassword _encryptDecryptPassword;
-        private readonly IJwtTokensRepository _jwtTokensRepository;
+        private readonly IConfiguration _configuration;
 
-        public UserRepository(DatabaseSettings settings, IMongoClient mongoClient, IEncryptDecryptPassword encryptDecryptPassword, IJwtTokensRepository jwtTokensRepository)
+        public UserRepository(DatabaseSettings settings, IMongoClient mongoClient, IEncryptDecryptPassword encryptDecryptPassword, IConfiguration configuration)
         {
             var database = mongoClient.GetDatabase(settings.DatabaseName);
             _user = database.GetCollection<User>(settings.CollectionNames["User"]);
             _encryptDecryptPassword = encryptDecryptPassword;
-            _jwtTokensRepository = jwtTokensRepository;
+            _configuration = configuration;
         }
 
-        public string ValidateUser(UserLoginViewModel user)
+
+        public User ValidateUser(UserLoginViewModel user)
         {
             string encryptedPassword = _encryptDecryptPassword.EncryptPassword(user.Password);
             var result = _user.Find(userdetails => userdetails.PhoneNumber == user.PhoneNumber && userdetails.Password == encryptedPassword).FirstOrDefault();
-            if (result != null)
-            {
-                string token =  _jwtTokensRepository.CreateTokenForUser(result);
-                return token;
-            }
-            return null;
 
+            return result;
         }
 
         public int RegisterUser(UserRegisterViewModel user)
@@ -58,5 +56,6 @@ namespace MedicaBE.Repository.Repository
             }
 
         }
-    }
+
+    } 
 }

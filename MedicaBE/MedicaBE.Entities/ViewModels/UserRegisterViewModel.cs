@@ -40,7 +40,5 @@ namespace MedicaBE.Entities.ViewModels
         [EmailAddress(ErrorMessage = "Invalid email format.")]
         public string? Email { get; set; }
 
-        [BsonElement("createdat")]
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

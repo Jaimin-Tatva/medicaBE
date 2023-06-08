@@ -20,22 +20,16 @@ namespace MedicaBE.Repository.Repository
             _user = _database.GetCollection<User>(settings.CollectionNames["User"]);
         }
 
-        public bool IsUserEmailUnique(string email)
+        public User IsUserEmailUnique(string email)
         {
-            var filter = Builders<User>.Filter.Eq("email", email);
-            var count = _user.CountDocuments(filter);
-
-            var result = _user.Find(x => x.Email == email).FirstOrDefault();
-
-            return count == 0;
+            var result = _user.Find(userdata => userdata.Email == email).FirstOrDefault();
+            return result;
         }
 
-        public bool IsUserPhoneUnique(long phonenumber)
+        public User IsUserPhoneUnique(long phonenumber)
         {
-            var filter = Builders<User>.Filter.Eq("phonenumber", phonenumber);
-            var count = _user.CountDocuments(filter);
-
-            return count == 0;
+            var result = _user.Find(userdata => userdata.PhoneNumber == phonenumber).FirstOrDefault();
+            return result;
         }
     }
 }
