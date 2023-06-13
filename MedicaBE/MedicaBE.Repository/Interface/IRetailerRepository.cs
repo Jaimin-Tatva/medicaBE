@@ -10,9 +10,11 @@ namespace MedicaBE.Entities.Interface
 {
     public interface IRetailerRepository
     {
-        public Retailer Registration(RegistrationVM model);
+        //public Retailer Registration(RegistrationVM model);
 
-        public Retailer Login(LoginVM model);
+        public Retailer Registration(Retailer retailer);
+
+        public Retailer Login(Retailer model);
 
         public List<Retailer> getuserlist();
     }

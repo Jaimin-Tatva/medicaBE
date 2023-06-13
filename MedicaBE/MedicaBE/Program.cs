@@ -12,6 +12,7 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using MedicaBE.Auth;
+using AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,8 +21,17 @@ builder.Services.AddScoped<IEncryptDecryptPassword, EncryptDecryptPassword>();
 builder.Services.AddScoped<JwtTokenHelper>();
 builder.Services.AddScoped<IUniqueAttributesRepository, UniqueAttributesRepository>();
 builder.Services.AddScoped<IRetailerRepository, RetailerRepository>();
+builder.Services.AddScoped<IMedicalRepository, MedicalRepository>();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
+var mapperConfig = new MapperConfiguration(cfg =>
+{
+    cfg.AddProfile(new MappingProfile());
+});
+
+IMapper mapper = mapperConfig.CreateMapper();
+builder.Services.AddSingleton(mapper);
+
 
 builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 builder.Services.Configure<DatabaseSettings>(builder.Configuration.GetSection(nameof(DatabaseSettings)));
@@ -63,6 +73,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerGen(swagger =>
 {
@@ -115,15 +126,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 app.UseSession();
-//app.Use(async (context, next) =>
-//{
-//    var token = context.Session.GetString("Token");
-//    if (!string.IsNullOrWhiteSpace(token))
-//    {
-//        context.Request.Headers.Add("Authorization", "Bearer " + token);
-//    }
-//    await next();
-//});
+
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
