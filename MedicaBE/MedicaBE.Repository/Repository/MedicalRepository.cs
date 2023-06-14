@@ -5,11 +5,15 @@ using iTextSharp.text.pdf.draw;
 using MedicaBE.Entities.Models;
 using MedicaBE.Repository.Interface;
 using MongoDB.Driver;
+using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+using Twilio.Types;
 
 namespace MedicaBE.Repository.Repository
 {
@@ -89,11 +93,10 @@ namespace MedicaBE.Repository.Repository
 
         public User CreateBill(string UserID, string Text)
         {
-            var filter = Builders<User>.Filter.Eq(x => x.UserId,UserID);
+            var filter = Builders<User>.Filter.Eq(x => x.UserId, UserID);
             var user = _user.Find(filter).FirstOrDefault();
             if (user != null)
             {
-
 
                 Document document = new Document();
 
@@ -104,10 +107,7 @@ namespace MedicaBE.Repository.Repository
                 var filePath = Path.Combine(Directory.GetCurrentDirectory(), "PDFs", $"{user.PhoneNumber}_{currentTimeString}.pdf");
                 PdfWriter writer = PdfWriter.GetInstance(document, new FileStream(filePath, FileMode.Create));
 
-
-
                 document.Open();
-
 
                 Paragraph header = new Paragraph("Medical Bill");
                 header.Alignment = Element.ALIGN_CENTER;
@@ -126,7 +126,7 @@ namespace MedicaBE.Repository.Repository
                 PdfPCell lineCell = new PdfPCell();
                 lineCell.Border = Rectangle.BOTTOM_BORDER;
                 lineCell.BorderColorBottom = BaseColor.BLACK;
-                lineCell.Padding = 5f;
+                lineCell.PaddingTop = 500f;
 
                 PdfPTable lineTable = new PdfPTable(1);
                 lineTable.WidthPercentage = 100;
@@ -136,16 +136,64 @@ namespace MedicaBE.Repository.Repository
                 document.Add(lineTable);
                 document.Add(new Paragraph(" "));
                 document.Add(new Paragraph("Text: " + Text));
-                document.Add(new Paragraph(" "));
-                document.Add(new Paragraph(" "));
-                document.Add(new Paragraph(" "));
-                document.Add(new Paragraph(" "));
-                document.Add(new Paragraph(" "));
-                document.Add(new Paragraph(" "));
-                document.Add(new Paragraph("PTO"));
-                document.Close();
-                
 
+
+                Paragraph bottomParagraph = new Paragraph();
+                float paddingSize = 400f; // Adjust this value to control the padding size
+
+                bottomParagraph.Leading = paddingSize;
+                bottomParagraph.Add("PTO");
+                bottomParagraph.Alignment = Element.ALIGN_CENTER;
+
+                // Add the bottom paragraph to the document
+                document.Add(bottomParagraph);
+
+                document.Close();
+
+                var url = "https://api.ultramsg.com/instance50771/messages/document";
+                var recipientNumber = "+91" + user.PhoneNumber;
+                var client = new RestClient(url);
+
+                var request = new RestRequest(url, Method.Post);
+                request.AddHeader("content-type", "application/x-www-form-urlencoded");
+                request.AddParameter("token", "obzujoi8r2rtwe4s");
+                request.AddParameter("to", recipientNumber);
+                request.AddParameter("filename", $"{user.PhoneNumber}_{currentTimeString}.pdf");
+                //request.AddParameter("document", "https://file-example.s3-accelerate.amazonaws.com/documents/cv.pdf");
+                request.AddParameter("caption", "document caption");
+
+                //var pdffilepath = "Downloads/Daily-weeky diary_Bhakti.pdf";
+                var pdffilepath = Path.Combine(Directory.GetCurrentDirectory(), "PDFs", $"{user.PhoneNumber}_{currentTimeString}.pdf");
+                byte[] AsBytes = File.ReadAllBytes(pdffilepath);
+                String AsBase64String = Convert.ToBase64String(AsBytes);
+                request.AddParameter("document", AsBase64String);
+
+
+
+                RestResponse response =  client.Execute(request);
+                var output = response.Content;
+                Console.WriteLine(output);
+
+
+
+                //string accountSid = "ACacdae2678b424c0fa2b6634bcb083ab9";
+                //string authToken = "5e5ebc46f635edd38bc69b72fa08ebb5";
+                //    string twilioNumber = "+13393452130";
+                //    string recipientNumber = "+91" + user.PhoneNumber;
+
+                // Initialize the Twilio client
+                //TwilioClient.Init(accountSid, authToken);
+
+                //var messageOptions = new CreateMessageOptions(new PhoneNumber("whatsapp:+917874503745"))
+                //{
+                //    //messageOptions.From = new PhoneNumber("whatsapp:+14155238886");
+                //    From = new PhoneNumber("whatsapp:+14155238886"),
+                //    Body = "Your appointment is coming up on July 21 at 3PM"
+
+                //};
+
+                //var message = MessageResource.Create(messageOptions);
+                //Console.WriteLine(message.Body);
 
                 return user;
             }
