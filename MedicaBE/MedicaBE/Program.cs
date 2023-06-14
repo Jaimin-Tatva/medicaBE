@@ -12,7 +12,10 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using MedicaBE.Auth;
+using MedicaBE.Entities.Mapper;
+using MedicaBE.Send_Pdf;
 using AutoMapper;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -111,6 +114,11 @@ builder.Services.AddSwaggerGen(swagger =>
                 });
 });
 
+builder.Services.AddAutoMapper(typeof(MappingProfiles));
+builder.Services.AddScoped<Send_pdf_whatsapp>();
+
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -127,13 +135,15 @@ if (app.Environment.IsDevelopment())
 }
 app.UseSession();
 
-
 app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<CookieAuthenticationMiddleware>();
+
+
 
 //app.MapControllers();
 app.UseEndpoints(endpoints =>

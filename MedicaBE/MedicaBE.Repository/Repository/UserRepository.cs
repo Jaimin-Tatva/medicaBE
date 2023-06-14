@@ -1,4 +1,5 @@
-﻿using MedicaBE.Entities.Models;
+﻿using AutoMapper;
+using MedicaBE.Entities.Models;
 using MedicaBE.Entities.ViewModels;
 using MedicaBE.Repository.Interface;
 using Microsoft.Extensions.Configuration;
@@ -17,13 +18,15 @@ namespace MedicaBE.Repository.Repository
         private readonly IMongoCollection<User> _user;
         private readonly IEncryptDecryptPassword _encryptDecryptPassword;
         private readonly IConfiguration _configuration;
+        private readonly IMapper _mapper;
 
-        public UserRepository(DatabaseSettings settings, IMongoClient mongoClient, IEncryptDecryptPassword encryptDecryptPassword, IConfiguration configuration)
+        public UserRepository(DatabaseSettings settings, IMongoClient mongoClient, IEncryptDecryptPassword encryptDecryptPassword, IConfiguration configuration, IMapper mapper)
         {
             var database = mongoClient.GetDatabase(settings.DatabaseName);
             _user = database.GetCollection<User>(settings.CollectionNames["User"]);
             _encryptDecryptPassword = encryptDecryptPassword;
             _configuration = configuration;
+            _mapper = mapper;
         }
 
 
@@ -37,17 +40,15 @@ namespace MedicaBE.Repository.Repository
 
         public int RegisterUser(UserRegisterViewModel user)
         {
-            User userdetails = new User();
-            userdetails.PhoneNumber = user.PhoneNumber;
-            userdetails.FirstName = user.FirstName;
-            userdetails.LastName = user.LastName;
-            userdetails.Email = user.Email;
-            userdetails.CreatedAt = DateTime.Now;
+            var userEntity = _mapper.Map<User>(user);
+
+            userEntity.CreatedAt = DateTime.Now;
             string encryptedPassword = _encryptDecryptPassword.EncryptPassword(user.Password);
-            userdetails.Password = encryptedPassword;
+            userEntity.Password = encryptedPassword;
+
             try
             {
-                _user.InsertOne(userdetails);
+                _user.InsertOne(userEntity);
                 return 1;
             }
             catch (Exception ex)
@@ -55,6 +56,16 @@ namespace MedicaBE.Repository.Repository
                 return 0;
             }
 
+        }
+
+        public List<User> GetUserList()
+        {
+            return _user.Find(_ => true).ToList();
+        }
+
+        public User GetUserById(string userid)
+        {
+            return _user.Find(user => user.UserId == userid).FirstOrDefault();
         }
 
     } 
