@@ -26,28 +26,43 @@ namespace MedicaBE.Repository.Repository
             _configuration = configuration;
         }
 
-        public Retailer Registration(RegistrationVM model)
+        //public Retailer Registration(RegistrationVM model)
+        //{
+        //    var filter = Builders<Retailer>.Filter.Eq(x => x.PhoneNumber, model.PhoneNumber);
+        //    var count = collection.CountDocuments(filter);
+        //    if(count > 0)
+        //    {
+        //        return null;
+        //    }
+        //    var newuser = new Retailer();
+        //    {
+        //        newuser.FirstName = model.FirstName;
+        //        newuser.LastName = model.LastName;
+        //        newuser.PhoneNumber = model.PhoneNumber;
+        //        string encrypt = _encryptDecryptPassword.EncryptPassword(model.Password);
+        //        newuser.Password = encrypt;
+
+        //    }
+        //    collection.InsertOne(newuser);
+        //    return newuser;
+        //}
+
+        public Retailer Registration(Retailer retailer)
         {
-            var filter = Builders<Retailer>.Filter.Eq(x => x.PhoneNumber, model.PhoneNumber);
+            var filter = Builders<Retailer>.Filter.Eq(x => x.PhoneNumber, retailer.PhoneNumber);
             var count = collection.CountDocuments(filter);
-            if(count > 0)
+            if (count > 0)
             {
                 return null;
             }
-            var newuser = new Retailer();
-            {
-                newuser.FirstName = model.FirstName;
-                newuser.LastName = model.LastName;
-                newuser.PhoneNumber = model.PhoneNumber;
-                string encrypt = _encryptDecryptPassword.EncryptPassword(model.Password);
-                newuser.Password = encrypt;
 
-            }
-            collection.InsertOne(newuser);
-            return newuser;
+            retailer.Password = _encryptDecryptPassword.EncryptPassword(retailer.Password);
+
+            collection.InsertOne(retailer);
+            return retailer;
         }
 
-        public Retailer Login(LoginVM model)
+        public Retailer Login(Retailer model)
         {
             string encryptPassword = _encryptDecryptPassword.EncryptPassword(model.Password);
             var filter = Builders<Retailer>.Filter.Eq(x => x.PhoneNumber, model.PhoneNumber) & Builders<Retailer>.Filter.Eq(x => x.Password, encryptPassword);
