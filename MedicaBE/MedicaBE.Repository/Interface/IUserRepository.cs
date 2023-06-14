@@ -13,6 +13,8 @@ public interface IUserRepository
 
     User ValidateUser(UserLoginViewModel user);
     public int RegisterUser(UserRegisterViewModel user);
+    public List<User> GetUserList();
+    public User GetUserById(string userid);
 
 }
 
